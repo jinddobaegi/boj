@@ -1,78 +1,61 @@
-from sys import stdin
-import heapq  # 우선순위 큐
+# 어떤 나라에는 1번부터 N번까지의 도시와 M개의 단방향 도로가 존재한다. 모든 도로의 거리는 1이다.
+# 이 때 특정한 도시 X로부터 출발하여 도달할 수 있는 모든 도시 중에서, 최단 거리가 정확히 K인 모든 도시들의 번호를 출력하는 프로그램을 작성하시오. 또한 출발 도시 X에서 출발 도시 X로 가는 최단 거리는 항상 0이라고 가정한다.
+# 예를 들어 N=4, K=2, X=1일 때 다음과 같이 그래프가 구성되어 있다고 가정하자.
+# 이 때 1번 도시에서 출발하여 도달할 수 있는 도시 중에서, 최단 거리가 2인 도시는 4번 도시 뿐이다.  2번과 3번 도시의 경우, 최단 거리가 1이기 때문에 출력하지 않는다.
 
-input = stdin.readline
+# 입력
+# 첫째 줄에 도시의 개수 N, 도로의 개수 M, 거리 정보 K, 출발 도시의 번호 X가 주어진다.
+#  (2 ≤ N ≤ 300,000, 1 ≤ M ≤ 1,000,000, 1 ≤ K ≤ 300,000, 1 ≤ X ≤ N)
+# 둘째 줄부터 M개의 줄에 걸쳐서 두 개의 자연수 A, B가 공백을 기준으로 구분되어 주어진다. 
+# 이는 A번 도시에서 B번 도시로 이동하는 단방향 도로가 존재한다는 의미다. (1 ≤ A, B ≤ N) 단, A와 B는 서로 다른 자연수이다.
+
+# 출력
+# X로부터 출발하여 도달할 수 있는 도시 중에서, 최단 거리가 K인 모든 도시의 번호를 한 줄에 하나씩 오름차순으로 출력한다.
+# 이 때 도달할 수 있는 도시 중에서, 최단 거리가 K인 도시가 하나도 존재하지 않으면 -1을 출력한다.
+
+import sys
+
+input = sys.stdin.readline
+from collections import deque
+
+def dijkstra(start, endpoint):
+    Q = deque([start])
+    distance[start] = 0
+    visited[start] = 1
 
 
-# 1부터 N까지 도시
-# M개의 단방향 도로
-# 모든 도로의 거리는 1
-# X로부터 최단거리가 K인 도시들의 번호를 출력
+    while Q:
+        now = Q.popleft()
+        if distance[now] == endpoint:
+            collection.append(now)
 
-N, M, K, X = map(int, input().split())
+        for next in graph[now]:
+            if visited[next] == 0 and distance[next] > distance[now] + 1:
+                distance[next] = distance[now] + 1
+                Q.append(next)
 
-adj_list = list([] for _ in range(N+1))
-for _ in range(M):
+totalcity, totalload, endindex, startindex = map(int, input().split()) #도시의 개수 N, 도로의 개수 M, 거리 정보 K, 출발 도시의 번호 X
+graph = [[] for _ in range(totalcity+1)]
+distance = [300001] * (totalcity+1)
+visited = [0] * (totalcity+1)
+collection = []
+for _ in range(totalload):
     a, b = map(int, input().split())
-    adj_list[a].append(b)  # 단방향
-    # 거리가 1이기 때문에, 거리 정보를 같이 저장하지 않음
-    # 만약 거리의 가중치가 다르다면
-    # (거리, 노드번호) 이런 식으로 adj_list를 만들자
+    graph[a].append(b)
+# print(graph)
 
+dijkstra(startindex,endindex)
 
-# Dijkstra
-# 방문한 지점이 있을 거고(visited 역할인데, 누적거리도 저장되는 visited임)
-# 우선순위(pq) 큐를 사용
-# pq에는 정점와 누적거리를 저장할 것임 (누적 거리 작은 순)
-# 시작점과 누적거리 방문
-# 1. 그 시점에서 갈 수 있는 곳과 누적거리들을 pq에 넣어줌
-# 2. pq에 있는 거 하나 꺼내서 방문 쳌
-# 1,2 반복
-# 반복하다가 visited에 있는 정점이 겹친다면? 누적거리 비교해서 작은 거 남김
-# 이렇게 도착점까지 반복
-
-# 1. 누적 거리 저장
-INF = int(1e9)
-distance = [INF] * (N+1)  # 0번 안 씀
-
-
-def dijkstra(s):
-    # 2. 우선순위 큐
-    pq = []
-
-    # 출발점 초기화
-    heapq.heappush(pq, (0, s))
-    distance[s] = 0
-
-    while pq:
-        # 현재 시점에서
-        # 누적 거리가 가장 짧은 노드에 대한 정보 꺼내기
-        dist, v = heapq.heappop(pq)
-
-        # 이미 방문 + 누적 거리가 더 짧게 방문한 적 있으면 pass
-        if distance[v] < dist:
-            continue
-
-        # 인접 노드를 확인
-        for w in adj_list[v]:
-            # w로 갔을 때 누적 거리 갱신
-            new_cost = dist + 1  # 가중치가 다르다면 1 대신 이동할 노드에 대한 거리(cost) 써줘야겠지?
-
-            # 누적 거리가 기존보다 크네?
-            if distance[w] <= new_cost:
-                continue
-
-            distance[w] = new_cost
-            heapq.heappush(pq, (new_cost, w))
-
-
-dijkstra(X)
-
-# X에서 이동할 수 있는 곳들의 최단거리가 distance에 저장돼있을 것임
-
-if K not in distance:
+if len(collection) == 0:
     print(-1)
 else:
-    for i in range(1, N+1):
-        if distance[i] == K:
-            print(i)
+    for i in sorted(collection):
+        print(i)
+
+
+
+
+
+
+
+
