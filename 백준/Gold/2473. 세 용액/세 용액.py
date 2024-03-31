@@ -1,34 +1,24 @@
-from sys import stdin
+import sys
 
-input = stdin.readline
+n = int(input())
+array = list(map(int, input().split()))
 
-N = int(input())  # 3 ~ 5000
-arr = list(map(int, input().split()))  # -10억 ~ 10억
-arr.sort()
+array.sort()
+minTake = sys.maxsize
 
-# 절댓값이 가장 작은 쪽으로 갱신(값으로 확인하고 용액들 갱신)
-min_v = int(1e9 * 3)
-isFound = False
-res = []
-
-# 검색했습니다...
-for i in range(N-2):
-    if isFound:
-        break
-    refer = arr[i]
-    l_p = i+1
-    r_p = N-1
-    while l_p < r_p:
-        tmp = refer + arr[l_p] + arr[r_p]
-        if abs(min_v) > abs(tmp):
-            min_v = tmp
-            res = [refer, arr[l_p], arr[r_p]]
-        if tmp < 0:
-            l_p += 1
-        elif tmp > 0:
-            r_p -= 1
+for i in range(n-2):
+    start = i + 1
+    end = n - 1
+    while start < end:
+        take = array[i] + array[start] + array[end]
+        if abs(take) < minTake:
+            minTake = abs(take)
+            result = [array[i], array[start], array[end]]
+        if take < 0:
+            start += 1
+        elif take > 0:
+            end -= 1
         else:
-            isFound = True
             break
-
-print(*res)
+            
+print(result[0], result[1], result[2])
