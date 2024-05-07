@@ -63,8 +63,8 @@ sub_seq = [0]
 for x in arr:
     if sub_seq[-1] < x:
         sub_seq.append(x)
-    
-    elif sub_seq[-1] > x:
+
+    else:
         # ss에서 x보다 큰 값 중 가장 작은 값을 찾아야 함
         # 그 위치에 x를 삽입
         tmp_idx = bin_search(len(sub_seq), x)
