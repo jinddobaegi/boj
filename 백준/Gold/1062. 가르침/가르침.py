@@ -1,75 +1,67 @@
-N, K = map(int, input().split())
-words = list(input().lstrip("anta").rstrip("tica") for _ in range(N))
-educated = [0] * 26  # 알파벳의 개수
+# 가르침
+# 골드4
 
-# K개의 글자를 가르쳤을 때
-# 학생들이 읽을 수 있는 단어 개수의 최댓값 출력
+'''
+최대한 많은 단어 읽게 하기
+dfs로 탐색해야할듯
+'''
 
-# K개의 글자가 뭔지는 알 수 없음
-# 따라서 가장 많이 읽을 수 있게 하는 경우 중
-# 가르치는 글자가 K개 이하인 것 중에 가장 큰 경우를 고르면 됨
-# 일단 뭔가 브루트포스 돌려도 될 것 같음
-
-# 1) K개의 글자를 선택
-# 2) 선택이 다 되면 그때의 읽을 수 있는 단어 수 업데이트
-
-# 있는 애들은 표시
-a_ord = ord('a')
-for c in 'antic':
-    x = ord(c) - a_ord
-    educated[x] = 1
+import sys
+input = sys.stdin.readline
 
 
-# 조건에 맞을 때 사용할
-# 단어 체크 함수
-def word_check():
-    cnt = 0
-    for word in words:
-        for char in word:
-            char_ord = ord(char) - a_ord
-            if not educated[char_ord]:
-                break
-        else:
-            cnt += 1
+n, k = map(int, input().split())
+words = [set(input().strip()[4:-4]) for _ in range(n)] # set으로 input 받으면서 중복 제거해줘
 
-    return cnt
+def dfs(s, cnt):
+    global ans
+    # a, c, i, n, t -> 무조건 배워야 돼
+    # 최소한 k개는 배워야되니까..
+    if cnt == k - 5:
+        tmp = 0  # 현재 읽을 수 있는 단어 개수 저장
 
+        # 목록 하나씩 확인하면서 돌면서
+        for word in words:
+            # 배운 글자로 해당 단어를 읽을 수 있는지 확인
+            is_contain = True
 
-def dfs(t, depth):  # 이 함수는 K >= 5일 때만 사용할 것임
-    global max_v
+            for w in word:
+                # 배우지 않은 글자 있으면
+                if not check[ord(w) - ord('a')]:
+                    is_contain = False
+                    break   # 단어 확인 중단
 
-    if t == 26 or depth == K-5:
-        # 조건에 맞으면 단어 체크
-        max_v = max(max_v, word_check())
+            # 해당 단어를 읽을 수 있는 경우
+            if is_contain:
+                tmp += 1  # 개수 check
+
+        ans = max(ans, tmp)
         return
-    
-    # t번째 글자 모르는 경우
-    if not educated[t]:
-        # t번째 글자를 가르치는 경우
-        educated[t] = 1
-        dfs(t+1, depth+1)
 
-        # t번째 글자를 몰라도 안 가르치고 넘어가는 경우
-        educated[t] = 0
-        dfs(t+1, depth)
+    for i in range(s, 26):
+        if not check[i]:
+            check[i] = True
+            dfs(i, cnt + 1)
+            check[i] = False
 
-    # t번째 글자 아는 경우
-    else:
-        dfs(t+1, depth)
-        
-    # for i in range(t, 26):
-    #     if not educated[i]:
-    #         # i번째 글자를 가르치는 경우
-    #         educated[i] = 1
-    #         dfs(i, depth+1)
-    #         # i번째 글자를 가르치치 않고 넘어가는 경우
-    #         educated[i] = 0
+check = [0] * 26
+ans = 0
 
+# 가르칠 글자수 5보다 적을 ㄷ떄
+if k < 5:
+    # 읽을 수 있는 단어 x
+    print(0)
+    exit(0)
 
-max_v = 0
-if K == 26:
-    max_v = N
-elif K >= 5:
-    dfs(0, 0)
+# 가르칠 글자수 26일 때
+elif k == 26:
+    # 전부 읽기 쌉 가능
+    print(n)
+    exit(0)
 
-print(max_v)
+# a, c, i, n, t 는 무조건 배워야 돼
+for w in ('a', 'c', 'i', 'n', 't'):
+    check[ord(w) - ord('a')] = True
+
+dfs(0, 0)
+print(ans)
