@@ -1,76 +1,41 @@
-from sys import stdin
+import sys
 
-input = stdin.readline
-
-N, M = map(int, input().split())
+n, m = map(int, input().split())
 a, b, c = map(int, input().split())
-arr = list(list(map(int, input().split())) for _ in range(N))
-min_v = int(1e9)
 
-# a: 공통 너비
-# b: 차 길이
-# c: 카라반 길이
+field = [[0 for _ in range(m+1)] for _ in range(n)]
 
-# 일자 하나, 기역자 둘
-# 1) 일자
-# (0, 0)에서 시작해서 첫 번째 값 구하고
-# 그냥 옮기면서 더하기 빼기만
-for i in range(N-a+1):
-    for j in range(M-(b+c)+1):
-        tmp = 0
-        flag = False
-        # 좌상단 좌표 -> arr[i][j]
-        for n in range(a):
-            for m in range(b+c):
-                tmp += arr[i+n][j+m]
-                if tmp > min_v:
-                    flag = True
-                    break
-            if flag:
-                break
-        min_v = min(min_v, tmp)
+_min = 1000000000
 
+for i in range(n):
+    temp = list(map(int, sys.stdin.readline().strip().split()))
+    field[i][1] = temp[0]
+    for j in range(2, m+1):
+        field[i][j] = field[i][j-1] + temp[j-1]
 
-# 2) 기역자
-# 카라반이랑 차 값을 따로 구하고
-# 옮기면서 더하기 빼기?
-def common_shape(x, y, z):  # z에
-    global min_v
+for i in range(n-a+1):
+    for j in range(m-(b+c)+1):
+        temp = 0
+        for k in range(i, i+a):
+            temp += field[k][j+b+c] - field[k][j]
+        _min = min(_min, temp)
 
-    for i in range(N-(x+y)+1):
-        for j in range(M-(z+x)+1):
-            tmp = 0
-            flag = False
-            # 좌상단 좌표 arr[i][j]
-            for n in range(x):
-                for m in range(z):
-                    tmp += arr[i+n][j+m]
-                    if tmp > min_v:
-                        flag = True
-                        break
-                if flag:
-                    break
+for i in range(n-(a+b)+1):
+    for j in range(m-(c+a)+1):
+        temp = 0
+        for k in range(i, i+a):
+            temp += field[k][j+c] - field[k][j]
+        for k in range(i+a, i+a+b):
+            temp += field[k][j+c+a] - field[k][j+c]
+        _min = min(_min, temp)
 
-            if flag:
-                continue
+for i in range(n-(a+c)+1):
+    for j in range(m-(b+a)+1):
+        temp = 0
+        for k in range(i, i+a):
+            temp += field[k][j+b] - field[k][j]
+        for k in range(i+a, i+a+c):
+            temp += field[k][j+b+a] - field[k][j+b]
+        _min = min(_min, temp)
 
-            for n in range(y):
-                for m in range(x):
-                    tmp += arr[n+i+x][m+j+z]
-                    if tmp > min_v:
-                        flag = True
-                        break
-                if flag:
-                    break
-
-            if flag:
-                continue
-
-            min_v = min(min_v, tmp)
-
-
-common_shape(a, b, c)
-if c != b:
-    common_shape(a, c, b)
-
-print(min_v)
+print(_min)
