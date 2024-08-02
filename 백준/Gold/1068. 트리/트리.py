@@ -14,7 +14,7 @@ for c in range(N):
     if p == -1:
         root = c
 
-    if c != d and p != d and p != -1:
+    elif c != d and p != d:
         ch[p].append(c)
 
 # d를 지웠을 때
