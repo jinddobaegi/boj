@@ -7,16 +7,15 @@ pr = list(map(int, input().split()))
 ch = [[] for _ in range(N)]
 d = int(input())
 
-# d 제거한 자식 리스트 생성 및 루트노드 확인
+# d를 제거한 자식 리스트 생성 및 루트노드 확인
 root = -1
 for c in range(N):
     p = pr[c]
-    if c != d:
-        if p != d and p != -1:
-            ch[p].append(c)
-
     if p == -1:
         root = c
+
+    if c != d and p != d and p != -1:
+        ch[p].append(c)
 
 # d를 지웠을 때
 # 리프 노드의 개수
