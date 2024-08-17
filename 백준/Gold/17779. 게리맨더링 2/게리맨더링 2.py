@@ -29,18 +29,6 @@ def make_border_of_fifth(r, c, d1, d2, area):
         area[r+d1+i][c-d1+i] = 5
 
 
-def fill_in_fifth(r, d1, d2, area):
-    flag = False
-    for i in range(r+1, r+d1+d2):
-        for j in range(N):
-            if area[i][j] == 5:
-                flag = 1 - flag
-                continue
-
-            if flag:
-                area[i][j] = 5
-
-
 def update_min(r, c, d1, d2):
     global min_v
 
@@ -49,8 +37,6 @@ def update_min(r, c, d1, d2):
     # 5구역 표시
     area[r][c] = 5
     make_border_of_fifth(r, c, d1, d2, area)
-    # fill_in_fifth(r, d1, d2, area)
-    # pprint(area)
     flag = False
     counts = [0] * 5
     for i in range(N):
@@ -61,31 +47,19 @@ def update_min(r, c, d1, d2):
                     flag = 1 - flag
             elif flag:  # 경계 안쪽 5구역이면
                 counts[4] += populations[i][j]  # 5구역 인구 추가
-                # 디버깅용
-                area[i][j] = 5
             # 1구역: 5번보다 r,c 다 작음
             elif i < r+d1 and j <= c:
                 counts[0] += populations[i][j]
-                # 디버깅용
-                area[i][j] = 1
             # 2구역: 5번보다 r은 작고, c는 큼
             elif i <= r+d2 and j > c:
                 counts[1] += populations[i][j]
-                # 디버깅용
-                area[i][j] = 2
             # 3구역: 5번보다 r은 크고, c는 작음
             elif i >= r+d1 and j < c-d1+d2:
                 counts[2] += populations[i][j]
-                # 디버깅용
-                area[i][j] = 3
             # 4구역: 5번보다 r,c 다 큼
             else:
                 counts[3] += populations[i][j]
-                # 디버깅용
-                area[i][j] = 4
-                
-    # print(counts)
-    # pprint(area)
+
     tmp = max(counts) - min(counts)
     min_v = min(min_v, tmp)
 
@@ -105,5 +79,3 @@ for r in range(N-2):
                 update_min(r, c, d1, d2)
 
 print(min_v)
-
-# update_min(1, 4, 3, 2)
