@@ -11,7 +11,6 @@ input = stdin.readline
 N = int(input())
 durations = [0] * (N+1)
 prior_works = [[] for _ in range(N+1)]
-# visited = [0] * (N+1)
 dp = [0] * (N+1)
 
 for i in range(1, N+1):
@@ -29,7 +28,7 @@ for i in range(1, N+1):
 
 def solution(w):
     if not dp[w]:
-        dp[w] = max(dp[w], durations[w])  # w의 작업시간
+        dp[w] = durations[w]  # w의 작업시간
 
         # 선행 작업 있는 경우
         if prior_works[w]:
