@@ -1,61 +1,129 @@
-from sys import stdin
-from collections import deque
+import sys
 
-input = stdin.readline
 
-# 채널은 0과 양의 정수, 무한개
-# 시작은 100, N까지 이동해야 함
-# 고장난 버튼이 주어졌을 때, N까지 이동하기 위한 최소 클릭 수
+def readLine():
+  return sys.stdin.readline().rstrip()
 
-N = int(input())  # 50만 이하
-M = int(input())  # 10 이하
-buttons = '+-1234567890'
-if M:
-    buttons = ''
-    tmp = tuple(map(str, input().split()))  # 0~9, +, - 있을 수 있음
-    for x in '+-1234567890':
-        if x not in tmp:
-            buttons += x
 
-# print(buttons)
-# bfs?
-# 일단 해보자 ㅋㅋ
-res = 0
-if N != 100:
-    q = deque()
-    visited = set()
-    q.append((100, 0, 0))  # (채널, 이전에 숫자 눌렀는지, cnt)
-    visited.add((100, 0))  # (채널, 이전에 숫자 눌렀는지)
-    is_found = False
-    is_num = 0
-    while q:
-        # print(q)
-        ch, is_num_before, cnt = q.popleft()
-        #############  RES TEST  #############
-        res = cnt+1
-        #############  RES TEST  #############
-        for b in buttons:
-            if b == '+':
-                is_num = 0
-                n_ch = ch + 1
-            elif b == '-':
-                is_num = 0
-                n_ch = ch - 1
-            elif is_num_before:  # 숫자 버튼인데 이전에 누른 게 숫자였던 경우
-                is_num = 1
-                n_ch = int(str(ch) + b)
-            else:  # 숫자 버튼인데 이전에 누른 게 숫자가 아닌 경우
-                is_num = 1
-                n_ch = int(b)
-            if 0 <= n_ch <= 1000000 and (n_ch, is_num) not in visited:
-                # print(f'현재채널: {ch}, 이전숫자: {is_num_before} 누른버튼: {b}, 새채널: {n_ch}')
-                if n_ch == N:
-                    is_found = True
-                    break
-                q.append((n_ch, is_num, res))
-                visited.add((n_ch, is_num))
+def getPresCnt(channel, brBtn):
+  n = len(brBtn)
+  channelDigit = len(str(channel))
+  cur = 100
+  direct = abs(channel - cur)
 
-        if is_found:
-            break
+  if n == 0:
+    return min(channelDigit, direct)
+  elif n == 10:
+    return direct
+  elif channel == 100:
+    return 0
+  else:
+    return min(getPresCntBrBtn(channel, brBtn), direct)
 
-print(res)
+
+def getPresCntBrBtn(channel, brBtn):
+  availBtn = getAvailButton(brBtn)
+  channelSplt = list(map(int, str(channel)))
+  idx = -1
+  for i, x in enumerate(channelSplt):
+    if x in brBtn:
+      idx = i
+      break
+
+  if idx == -1:
+    return len(channelSplt)
+  else:
+    return getMinBtnCnt(channelSplt, idx, availBtn)
+
+
+def getMinBtnCnt(channelSplt, spliter, availBtn):
+  channel = int(''.join(map(str, channelSplt)))
+  
+  back = ''.join(map(str,channelSplt[spliter::]))
+  digit = len(back) - 1
+  
+  minAvailBtn = str(min(availBtn))
+  maxAvailBtn = str(max(availBtn))
+
+  minAdd = ''
+  maxAdd = ''
+  for _ in range(digit):
+    minAdd += minAvailBtn
+    maxAdd += maxAvailBtn
+
+
+  availNum = []
+  
+  
+  
+  if spliter == 0:
+    front = ''
+    mid = ''
+    AvailBtnNoZero = list(filter(lambda x: x != 0, availBtn))
+    if AvailBtnNoZero:
+      minAvailBtnNoZero = min(AvailBtnNoZero)
+      availNum.append(int(f'{minAvailBtnNoZero}{minAvailBtn}{minAdd}'))
+
+    if digit != 0:
+      availNum.append(int(maxAdd))
+
+  elif spliter==1:
+    front = ''.join(map(str,channelSplt[:spliter-1:]))
+    mid = channelSplt[spliter-1]
+    
+    minAvailBtnUpMid = list(filter(lambda x: x>mid, availBtn))
+    AvailBtnDwMid = list(filter(lambda x: x<mid, availBtn))
+    AvailBtnDwMid.append(0)
+
+    if minAvailBtnUpMid:
+      minAvailBtnUpMid = min(minAvailBtnUpMid)
+      availNum.append(int(f'{front}{minAvailBtnUpMid}{minAvailBtn}{minAdd}'))
+      
+    maxAvailBtnDwMid = max(AvailBtnDwMid)
+    availNum.append(int(f'{front}{maxAvailBtnDwMid}{maxAvailBtn}{maxAdd}'))
+    
+  else:
+    front = ''.join(map(str,channelSplt[:spliter-1:]))
+    mid = channelSplt[spliter-1]    
+    AvailBtnUpMid = list(filter(lambda x: x>mid, availBtn))
+    AvailBtnDwMid = list(filter(lambda x: x<mid, availBtn))
+    
+    if AvailBtnUpMid:
+      minAvailBtnUpMid = min(AvailBtnUpMid)
+      availNum.append(int(f'{front}{minAvailBtnUpMid}{minAvailBtn}{minAdd}'))
+    if AvailBtnDwMid:
+      maxAvailBtnDwMid = max(AvailBtnDwMid)
+      availNum.append(int(f'{front}{maxAvailBtnDwMid}{maxAvailBtn}{maxAdd}'))
+
+  
+  
+  for i in availBtn:
+    availNum.append(int(f'{front}{mid}{i}{minAdd}'))
+    availNum.append(int(f'{front}{mid}{i}{maxAdd}'))
+
+  minimum = abs(availNum[0]-channel)+len(str(availNum[0]))
+  for i in availNum:
+    tmp = abs(i-channel) +len(str(i))
+    if tmp < minimum:
+      minimum = tmp
+
+  return minimum
+
+  
+def getAvailButton(brBtn):
+  return list(filter(lambda x: (x not in brBtn), list(range(10))))
+
+
+def main():
+  channel = int(readLine())
+  n = int(readLine())
+  brBtn = set()
+  if n != 0:
+    brBtn = set(map(int, readLine().split()))
+
+  answer = getPresCnt(channel, brBtn)
+  print(answer)
+
+
+if __name__ == "__main__":
+  main()
